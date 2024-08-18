@@ -321,26 +321,33 @@ void updateAnimationSolidColor()
 
 void updateAnimationHalf() 
 {
-  unsigned long rainbowAnimationDuration = 10000;
+  unsigned long rainbowAnimationDuration = 2000;
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
-  int hueShift = 255 / 3; 
-  int pixelCount = NEO_PIXELS / 2;
+  int hueShift1 = 255 / 3; 
+  int hueShift2 = 255 / 3 * 2; 
+  int pixelCount1 = NEO_PIXELS / 3;
+  int pixelCount2 = NEO_PIXELS / 3 * 2;
 
   uint8_t hue1 = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
-  uint8_t hue2 = hue1 + hueShift;
+  uint8_t hue2 = hue1 + hueShift1;
+  uint8_t hue3 = hue1 + hueShift2;
   ColorRGB color1 = getColorRGB(hue1, 255, 255);
   ColorRGB color2 = getColorRGB(hue2, 255, 255);
+  ColorRGB color3 = getColorRGB(hue3, 255, 255);
   for (uint8_t i = 0; i < NEO_PIXELS; i++)
-  {
-    if (i < pixelCount)
+  { 
+    if (i < pixelCount1)
     {
       NEO_writeColor(color1.r, color1.g, color1.b, 0);
       //NEO_writeHSV(hue1, 255, 255, 0);
     }
-    else
+    else if (i < pixelCount2)
     {
       NEO_writeColor(color2.r, color2.g, color2.b, 0);
-      //NEO_writeHSV(hue2, 255, 255, 0);
+    } 
+    else
+    {
+       NEO_writeColor(color3.r, color3.g, color3.b, 0);
     }
   }
   NEO_latch();
