@@ -321,47 +321,90 @@ void updateAnimationSolidColor()
 
 void updateAnimationHalf() 
 {
-  unsigned long rainbowAnimationDuration = 2000;
+  unsigned long rainbowAnimationDuration = 1000;
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
+  unsigned long stepState = currentTime % (rainbowAnimationDuration * 2) / rainbowAnimationDuration;
 
-  int pixelCount1 = NEO_PIXELS / 3;
+  int pixelCount1 = NEO_PIXELS / 2;
 
   uint8_t hue1 = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
   ColorRGB color1 = getColorRGB(hue1, 255, 255);
 
-  for (uint8_t i = 0; i < NEO_PIXELS; i++)
-  { 
-    if (color1.r == 0) 
+  if (stepState == 0) 
+  {
+    for (uint8_t i = 0; i < NEO_PIXELS; i++)
     {
-      if (i < pixelCount1) 
+      if (color1.b == 0) 
       {
-        NEO_writeColor(0, color1.g, 0, 0);
+        if (i < pixelCount1) 
+        {
+          NEO_writeColor(0, color1.g, 0, 0);
+        }
+        else
+        {
+          NEO_writeColor(color1.r, 0, 0, 0);
+        }
+      } 
+      else if (color1.r == 0) 
+      {
+        if (i < pixelCount1) 
+        {
+          NEO_writeColor(0, color1.g, 0, 0);
+        }
+        else
+        {
+          NEO_writeColor(0, 0, color1.b, 0);
+        }
       }
-      else
+      else 
       {
-        NEO_writeColor(0, 0, color1.b, 0);
-      }
-    } 
-    else if (color1.g == 0) 
-    {
-      if (i < pixelCount1) 
-      {
-        NEO_writeColor(color1.r, 0, 0, 0);
-      }
-      else
-      {
-        NEO_writeColor(0, 0, color1.b, 0);
+        if (i < pixelCount1) 
+        {
+          NEO_writeColor(color1.r, 0, 0, 0);
+        }
+        else
+        {
+          NEO_writeColor(0, 0, color1.b, 0);
+        }
       }
     }
-    else
+  }
+  else
+  {
+    for (uint8_t i = 0; i < NEO_PIXELS; i++)
     {
-      if (i < pixelCount1) 
+      if (color1.b == 0) 
       {
-        NEO_writeColor(0, color1.g, 0, 0);
+        if (i < pixelCount1) 
+        {
+          NEO_writeColor(color1.r, 0, 0, 0);
+        }
+        else
+        {
+          NEO_writeColor(0, color1.g, 0, 0);
+        }
+      } 
+      else if (color1.r == 0) 
+      {
+        if (i < pixelCount1) 
+        {
+          NEO_writeColor(0, 0, color1.b, 0);
+        }
+        else
+        {
+          NEO_writeColor(0, color1.g, 0, 0);
+        }
       }
-      else
+      else 
       {
-        NEO_writeColor(color1.r, 0, 0, 0);
+        if (i < pixelCount1) 
+        {
+          NEO_writeColor(0, 0, color1.b, 0);
+        }
+        else
+        {
+          NEO_writeColor(color1.r, 0, 0, 0);
+        }
       }
     }
   }
