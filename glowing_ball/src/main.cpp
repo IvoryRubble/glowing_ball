@@ -115,7 +115,7 @@ ColorRGB getColorRGB(uint8_t h, uint8_t s, uint8_t v) {
   return color;
 }
 
-ColorRGB getColorRGB_customPallete(uint8_t h, uint8_t s, uint8_t v) {
+ColorRGB getColorRGB_customPalette(uint8_t h, uint8_t s, uint8_t v) {
   ColorRGB color;
 
   if (h < 255 * 1 / 6)
@@ -366,7 +366,7 @@ void updateAnimationHue_customPalette()
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
 
   uint8_t hue = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
-  ColorRGB color = getColorRGB_customPallete(hue, 255, 255);
+  ColorRGB color = getColorRGB_customPalette(hue, 255, 255);
   
   NEO_writeColor_all(color.r, color.g, color.b, 0);
   NEO_latch();
@@ -387,7 +387,7 @@ void updateAnimationHalf()
   int pixelCount1 = NEO_PIXELS / 2;
 
   uint8_t hue1 = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
-  ColorRGB color1 = getColorRGB(hue1, 255, 255);
+  ColorRGB color1 = getColorRGB_customPalette(hue1, 255, 255);
 
   if (stepState == 0) 
   {
@@ -474,10 +474,10 @@ void updateAnimationWrapper()
 {
   //updateAnimationHueBreath();
   //updateAnimationHue();
-  updateAnimationHue_customPalette();
+  //updateAnimationHue_customPalette();
   //updateAnimationSteps();
   //updateAnimationSolidColor();
-  //updateAnimationHalf();
+  updateAnimationHalf();
 
   _delay_ms(1);
   currentTime++;
@@ -494,7 +494,7 @@ int main(void)
   // _delay_ms(3000);
   PORTB = 0b00111111;
   DDRB = (1 << NEO_PIN); // set pixel DATA pin as output
-  startupCheck();
+  //startupCheck();
 
   // Loop
   while (1)
