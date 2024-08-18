@@ -80,6 +80,73 @@ void NEO_clear(void)
     NEO_writeColor(0, 0, 0, 0);
 }
 
+typedef struct ColorRGB {
+  int r;
+  int g;
+  int b;
+} ColorRGB;
+
+ColorRGB getColorRGB(uint8_t h, uint8_t s, uint8_t v) {
+  ColorRGB color;
+
+  if (h < 255 / 3)
+  {
+    color.g = map(h, 0, 255 / 3 - 1, 0, 255);
+    color.r = 255 - color.g;
+    color.b = 0;
+  }
+  else if (h < 255 * 2 / 3)
+  {
+    color.r = 0;
+    color.b = map(h, 255 / 3, 255 * 2 / 3 - 1, 0, 255);
+    color.g = 255 - color.b;
+  }
+  else
+  {
+    color.r = map(h, 255 * 2 / 3, 255, 0, 255);
+    color.g = 0;
+    color.b = 255 - color.r;
+  }
+
+  color.r = map(color.r, 0, 255, 0, v);
+  color.g = map(color.g, 0, 255, 0, v);
+  color.b = map(color.b, 0, 255, 0, v);
+
+  return color;
+}
+
+void NEO_writeHSV(uint8_t h, uint8_t s, uint8_t v, uint8_t w)
+{
+  uint8_t r = 0;
+  uint8_t g = 0;
+  uint8_t b = 0;
+
+  if (h < 255 / 3)
+  {
+    g = map(h, 0, 255 / 3 - 1, 0, 255);
+    r = 255 - g;
+    b = 0;
+  }
+  else if (h < 255 * 2 / 3)
+  {
+    r = 0;
+    b = map(h, 255 / 3, 255 * 2 / 3 - 1, 0, 255);
+    g = 255 - b;
+  }
+  else
+  {
+    r = map(h, 255 * 2 / 3, 255, 0, 255);
+    g = 0;
+    b = 255 - r;
+  }
+
+  r = map(r, 0, 255, 0, v);
+  g = map(g, 0, 255, 0, v);
+  b = map(b, 0, 255, 0, v);
+
+  NEO_writeColor(r, g, b, w);
+}
+
 void NEO_writeHSV_all(uint8_t h, uint8_t s, uint8_t v, uint8_t w)
 {
   uint8_t r = 0;
@@ -201,14 +268,14 @@ void updateAnimationSteps()
 
 void updateAnimationHueBreath()
 {
-  const unsigned long rainbowDuration = 3600000;
+  const unsigned long rainbowDuration = 10000;
   unsigned long rainbowState = currentTime % rainbowDuration;
 
   const unsigned long breathDuration = 3000; // 1600;
   const unsigned long breathPauseMin = 2000; // 20;
   const unsigned long breathPauseMax = 0;
   const unsigned long breathMin = 0;
-  const unsigned long breathMax = 255; // 0;
+  const unsigned long breathMax = 1; // 0;
   unsigned long breathState = currentTime % (breathPauseMin * 2 + breathDuration * 2 + breathPauseMax * 2);
 
   uint8_t value = 0;
@@ -238,7 +305,7 @@ void updateAnimationHueBreath()
 
 void updateAnimationHue()
 {
-  unsigned long rainbowAnimationDuration = 30000;
+  unsigned long rainbowAnimationDuration = 10000;
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
 
   uint8_t hue = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
@@ -252,12 +319,40 @@ void updateAnimationSolidColor()
   NEO_latch();
 }
 
+void updateAnimationHalf() 
+{
+  unsigned long rainbowAnimationDuration = 10000;
+  unsigned long rainbowState = currentTime % rainbowAnimationDuration;
+  int hueShift = 255 / 3; 
+  int pixelCount = NEO_PIXELS / 2;
+
+  uint8_t hue1 = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
+  uint8_t hue2 = hue1 + hueShift;
+  ColorRGB color1 = getColorRGB(hue1, 255, 255);
+  ColorRGB color2 = getColorRGB(hue2, 255, 255);
+  for (uint8_t i = 0; i < NEO_PIXELS; i++)
+  {
+    if (i < pixelCount)
+    {
+      NEO_writeColor(color1.r, color1.g, color1.b, 0);
+      //NEO_writeHSV(hue1, 255, 255, 0);
+    }
+    else
+    {
+      NEO_writeColor(color2.r, color2.g, color2.b, 0);
+      //NEO_writeHSV(hue2, 255, 255, 0);
+    }
+  }
+  NEO_latch();
+}
+
 void updateAnimationWrapper()
 {
-  updateAnimationHueBreath();
-  // updateAnimationHue();
-  //  updateAnimationSteps();
-  //  updateAnimationSolidColor();
+  //updateAnimationHueBreath();
+  //updateAnimationHue();
+  //updateAnimationSteps();
+  //updateAnimationSolidColor();
+  updateAnimationHalf();
 
   _delay_ms(1);
   currentTime++;
