@@ -115,6 +115,53 @@ ColorRGB getColorRGB(uint8_t h, uint8_t s, uint8_t v) {
   return color;
 }
 
+ColorRGB getColorRGB_customPallete(uint8_t h, uint8_t s, uint8_t v) {
+  ColorRGB color;
+
+  if (h < 255 * 1 / 6)
+  {
+    color.g = map(h, 0, 255 * 1 / 6 - 1, 0, 255);
+    color.r = 255;
+    color.b = 0;
+  }
+  else if (h < 255 * 2 / 6)
+  {
+    color.g = 255;
+    color.r = map(h, 255 * 1 / 6, 255 * 2 / 6 - 1, 255, 0);
+    color.b = 0;
+  }
+  else if (h < 255 * 3 / 6)
+  {
+    color.g = 255;
+    color.r = 0;
+    color.b = map(h, 255 * 2 / 6, 255 * 3 / 6 - 1, 0, 255);
+  }
+  else if (h < 255 * 4 / 6)
+  {
+    color.g = map(h, 255 * 3 / 6, 255 * 4 / 6 - 1, 255, 0);
+    color.r = 0;
+    color.b = 255;
+  }
+  else if (h < 255 * 5 / 6)
+  {
+    color.g = 0;
+    color.r = map(h, 255 * 4 / 6, 255 * 5 / 6 - 1, 0, 255);
+    color.b = 255;
+  }
+  else 
+  {
+    color.g = 0;
+    color.r = 255;
+    color.b = map(h, 255 * 5 / 6, 255, 255, 0);
+  }
+
+  color.r = map(color.r, 0, 255, 0, v);
+  color.g = map(color.g, 0, 255, 0, v);
+  color.b = map(color.b, 0, 255, 0, v);
+
+  return color;
+}
+
 void NEO_writeHSV(uint8_t h, uint8_t s, uint8_t v, uint8_t w)
 {
   uint8_t r = 0;
@@ -313,6 +360,18 @@ void updateAnimationHue()
   NEO_latch();
 }
 
+void updateAnimationHue_customPalette()
+{
+  unsigned long rainbowAnimationDuration = 20000;
+  unsigned long rainbowState = currentTime % rainbowAnimationDuration;
+
+  uint8_t hue = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
+  ColorRGB color = getColorRGB_customPallete(hue, 255, 255);
+  
+  NEO_writeColor_all(color.r, color.g, color.b, 0);
+  NEO_latch();
+}
+
 void updateAnimationSolidColor()
 {
   NEO_writeColor_all(255, 100, 0, 10);
@@ -321,7 +380,7 @@ void updateAnimationSolidColor()
 
 void updateAnimationHalf() 
 {
-  unsigned long rainbowAnimationDuration = 1000;
+  unsigned long rainbowAnimationDuration = 10000;
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
   unsigned long stepState = currentTime % (rainbowAnimationDuration * 2) / rainbowAnimationDuration;
 
@@ -415,9 +474,10 @@ void updateAnimationWrapper()
 {
   //updateAnimationHueBreath();
   //updateAnimationHue();
+  updateAnimationHue_customPalette();
   //updateAnimationSteps();
   //updateAnimationSolidColor();
-  updateAnimationHalf();
+  //updateAnimationHalf();
 
   _delay_ms(1);
   currentTime++;
