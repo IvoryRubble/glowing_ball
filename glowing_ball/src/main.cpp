@@ -277,10 +277,18 @@ void startupCheck()
   NEO_latch();
   _delay_ms(3000);
 
-  startupCheckColor(255, 0, 0, 0);
-  startupCheckColor(0, 255, 0, 0);
-  startupCheckColor(0, 0, 255, 0);
-  startupCheckColor(0, 0, 0, 255);
+  NEO_writeColor_all(255, 0, 0, 0);
+  NEO_latch();
+  _delay_ms(500);
+  NEO_writeColor_all(0, 255, 0, 0);
+  NEO_latch();
+  _delay_ms(500);
+  NEO_writeColor_all(0, 0, 255, 0);
+  NEO_latch();
+  _delay_ms(500);
+  NEO_writeColor_all(0, 0, 255, 0);
+  NEO_latch();
+  _delay_ms(500);
 }
 
 unsigned long currentTime = 0;
@@ -380,93 +388,63 @@ void updateAnimationSolidColor()
 
 void updateAnimationHalf() 
 {
-  unsigned long rainbowAnimationDuration = 10000;
+  unsigned long rainbowAnimationDuration = 30000;
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
-  unsigned long stepState = currentTime % (rainbowAnimationDuration * 2) / rainbowAnimationDuration;
-
-  int pixelCount1 = NEO_PIXELS / 2;
-
-  uint8_t hue1 = map(rainbowState, 0, rainbowAnimationDuration, 0, 255);
-  ColorRGB color1 = getColorRGB_customPalette(hue1, 255, 255);
-
-  if (stepState == 0) 
+  unsigned long colorMax = 255 * NEO_PIXELS;
+  unsigned long hueMax = colorMax * 6;
+  unsigned long hue = map(rainbowState, 0, rainbowAnimationDuration, 0, hueMax);
+  
+  unsigned long r;
+  unsigned long g;
+  unsigned long b;
+  if (hue <= hueMax * 1 / 6)
   {
-    for (uint8_t i = 0; i < NEO_PIXELS; i++)
-    {
-      if (color1.b == 0) 
-      {
-        if (i < pixelCount1) 
-        {
-          NEO_writeColor(0, color1.g, 0, 0);
-        }
-        else
-        {
-          NEO_writeColor(color1.r, 0, 0, 0);
-        }
-      } 
-      else if (color1.r == 0) 
-      {
-        if (i < pixelCount1) 
-        {
-          NEO_writeColor(0, color1.g, 0, 0);
-        }
-        else
-        {
-          NEO_writeColor(0, 0, color1.b, 0);
-        }
-      }
-      else 
-      {
-        if (i < pixelCount1) 
-        {
-          NEO_writeColor(color1.r, 0, 0, 0);
-        }
-        else
-        {
-          NEO_writeColor(0, 0, color1.b, 0);
-        }
-      }
-    }
+    g = map(hue, 0, hueMax * 1 / 6, 0, colorMax);
+    r = colorMax;
+    b = 0;
   }
-  else
+  else if (hue <= hueMax * 2 / 6)
   {
-    for (uint8_t i = 0; i < NEO_PIXELS; i++)
-    {
-      if (color1.b == 0) 
-      {
-        if (i < pixelCount1) 
-        {
-          NEO_writeColor(color1.r, 0, 0, 0);
-        }
-        else
-        {
-          NEO_writeColor(0, color1.g, 0, 0);
-        }
-      } 
-      else if (color1.r == 0) 
-      {
-        if (i < pixelCount1) 
-        {
-          NEO_writeColor(0, 0, color1.b, 0);
-        }
-        else
-        {
-          NEO_writeColor(0, color1.g, 0, 0);
-        }
-      }
-      else 
-      {
-        if (i < pixelCount1) 
-        {
-          NEO_writeColor(0, 0, color1.b, 0);
-        }
-        else
-        {
-          NEO_writeColor(color1.r, 0, 0, 0);
-        }
-      }
-    }
+    g = colorMax;
+    r = map(hue, hueMax * 1 / 6, hueMax * 2 / 6, colorMax, 0);
+    b = 0;
   }
+  else if (hue <= hueMax * 3 / 6)
+  {
+    g = colorMax;
+    r = 0;
+    b = map(hue, hueMax * 2 / 6, hueMax * 3 / 6, 0, colorMax);
+  }
+  else if (hue <= hueMax * 4 / 6)
+  {
+    g = map(hue, hueMax * 3 / 6 + 1, hueMax * 4 / 6, colorMax, 0);
+    r = 0;
+    b = colorMax;
+  }
+  else if (hue <= hueMax * 5 / 6)
+  {
+    g = 0;
+    r = map(hue, hueMax * 4 / 6 + 1, hueMax * 5 / 6, 0, colorMax);
+    b = colorMax;
+  }
+  else 
+  {
+    g = 0;
+    r = colorMax;
+    b = map(hue, hueMax * 5 / 6 + 1, hueMax, colorMax, 0);
+  }
+
+  for (unsigned int i = 0; i < NEO_PIXELS; i++) 
+  {
+    //NEO_writeColor(i < (r / 255) ? 255 : (r % 255), i < (g / 255) ? 255 : (g % 255), i < (b / 255) ? 255 : (b % 255), 0);
+    NEO_writeColor(
+      i < (r / 255) ? 255 : (i == (r / 255) ? (r % 255) : 0), 
+      i < (g / 255) ? 255 : (i == (g / 255) ? (g % 255) : 0), 
+      i < (b / 255) ? 255 : (i == (b / 255) ? (b % 255) : 0), 
+      0
+    );
+  }
+
   NEO_latch();
 }
 
