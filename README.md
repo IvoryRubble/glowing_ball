@@ -12,6 +12,12 @@ Slowly change colors started from one side, while maintain max possible brightne
 
 Based on https://github.com/wagiminator/ATtiny13-NeoController    
 
+Video demo:  
+https://youtu.be/HeBRopewjwI  
+[![Video demo](https://img.youtube.com/vi/skpBElRQ0Kw/0.jpg)](https://www.youtube.com/watch?v=skpBElRQ0Kw)  
+
+Link to ball at online store (non-referal)  
+https://ozon.ru/t/P2VLye6  
 
 ## Making of
 
