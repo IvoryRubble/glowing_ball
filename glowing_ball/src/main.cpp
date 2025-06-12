@@ -17,33 +17,21 @@
 //
 // Fuse settings: -U lfuse:w:0x3a:m -U hfuse:w:0xff:m
 
-// ===================================================================================
-// Libraries and Definitions
-// ===================================================================================
-
-// Libraries
 #include <avr/io.h>        // for GPIO
 #include <avr/sleep.h>     // for sleep functions
-#include <avr/pgmspace.h>  // to store data in programm memory
 #include <avr/interrupt.h> // for interrupts
 #include <util/delay.h>    // for delays
 #include "map.h"
 
-// Pin definitions
-#define NEO_PIN PB3 // Pin for neopixels
+int NEO_PIN = PB3;
+int NEO_PIXELS = 13;
+unsigned long currentTime = 0;
 
-#define NEO_PIXELS 13 // number of pixels in the string (max 255)
+void NEO_latch() {
+  _delay_us(281);
+}
 
-// ===================================================================================
-// Neopixel Implementation for 9.6 MHz MCU Clock and 800 kHz Pixels
-// ===================================================================================
-
-// NeoPixel parameter and macros
-#define NEO_latch() _delay_us(281)        // delay to show shifted colors
-
-// Send a byte to the pixels string
-void NEO_sendByte(uint8_t byte)
-{ // CLK  comment
+void NEO_sendByte(uint8_t byte) { 
   for (uint8_t bit = 8; bit; bit--)
     asm volatile(                     //  3   8 bits, MSB first
         "sbi  %[port], %[pin]   \n\t" //  2   DATA HIGH
@@ -58,38 +46,14 @@ void NEO_sendByte(uint8_t byte)
         [byte] "r"(byte));
 }
 
-// Write color to a single pixel
-void NEO_writeColor(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
-{
+void NEO_writeColor(uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
   NEO_sendByte(g);
   NEO_sendByte(r);
   NEO_sendByte(b);
   NEO_sendByte(w);
 }
 
-void NEO_writeColor_all(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
-{
-  for (uint8_t i = NEO_PIXELS; i; i--)
-    NEO_writeColor(r, g, b, w);
-}
-
-// Switch off all pixels
-void NEO_clear(void)
-{
-  for (uint8_t i = NEO_PIXELS * 3; i; i--)
-    NEO_writeColor(0, 0, 0, 0);
-}
-
-typedef struct ColorRGB {
-  int r;
-  int g;
-  int b;
-} ColorRGB;
-
-unsigned long currentTime = 0;
-
-void updateAnimation() 
-{
+void updateAnimation() {
   unsigned long rainbowAnimationDuration = 30000;
   unsigned long rainbowState = currentTime % rainbowAnimationDuration;
   unsigned long colorMax = 255 * NEO_PIXELS;
@@ -99,46 +63,38 @@ void updateAnimation()
   unsigned long r;
   unsigned long g;
   unsigned long b;
-  if (hue <= hueMax * 1 / 6)
-  {
+  if (hue <= hueMax * 1 / 6) {
     g = map(hue, 0, hueMax * 1 / 6, 0, colorMax);
     r = colorMax;
     b = 0;
   }
-  else if (hue <= hueMax * 2 / 6)
-  {
+  else if (hue <= hueMax * 2 / 6) {
     g = colorMax;
     r = map(hue, hueMax * 1 / 6, hueMax * 2 / 6, colorMax, 0);
     b = 0;
   }
-  else if (hue <= hueMax * 3 / 6)
-  {
+  else if (hue <= hueMax * 3 / 6) {
     g = colorMax;
     r = 0;
     b = map(hue, hueMax * 2 / 6, hueMax * 3 / 6, 0, colorMax);
   }
-  else if (hue <= hueMax * 4 / 6)
-  {
+  else if (hue <= hueMax * 4 / 6) {
     g = map(hue, hueMax * 3 / 6 + 1, hueMax * 4 / 6, colorMax, 0);
     r = 0;
     b = colorMax;
   }
-  else if (hue <= hueMax * 5 / 6)
-  {
+  else if (hue <= hueMax * 5 / 6) {
     g = 0;
     r = map(hue, hueMax * 4 / 6 + 1, hueMax * 5 / 6, 0, colorMax);
     b = colorMax;
   }
-  else 
-  {
+  else {
     g = 0;
     r = colorMax;
     b = map(hue, hueMax * 5 / 6 + 1, hueMax, colorMax, 0);
   }
 
-  for (unsigned int i = 0; i < NEO_PIXELS; i++) 
-  {
-    //NEO_writeColor(i < (r / 255) ? 255 : (r % 255), i < (g / 255) ? 255 : (g % 255), i < (b / 255) ? 255 : (b % 255), 0);
+  for (unsigned int i = 0; i < NEO_PIXELS; i++) {
     NEO_writeColor(
       i < (r / 255) ? 255 : (i == (r / 255) ? (r % 255) : 0), 
       i < (g / 255) ? 255 : (i == (g / 255) ? (g % 255) : 0), 
@@ -150,29 +106,22 @@ void updateAnimation()
   NEO_latch();
 }
 
-void updateAnimationWrapper()
-{
+void updateAnimationWrapper() {
   updateAnimation();
 
   _delay_ms(1);
   currentTime++;
 }
 
-// ===================================================================================
-// Main Function
-// ===================================================================================
-
-int main(void)
-{
+int main(void) {
   // Setup
   cli();
   // _delay_ms(3000);
   PORTB = 0b00111111;
-  DDRB = (1 << NEO_PIN); // set pixel DATA pin as output
+  DDRB = (1 << NEO_PIN); 
 
   // Loop
-  while (1)
-  {
+  while (1) {
     updateAnimationWrapper();
   }
 }
