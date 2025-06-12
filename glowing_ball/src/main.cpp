@@ -23,8 +23,8 @@
 #include <util/delay.h>    // for delays
 #include "map.h"
 
-int NEO_PIN = PB3;
-int NEO_PIXELS = 13;
+const int NEO_PIN = PB3;
+const int NEO_PIXELS = 13;
 unsigned long currentTime = 0;
 
 void NEO_latch() {
@@ -67,28 +67,23 @@ void updateAnimation() {
     g = map(hue, 0, hueMax * 1 / 6, 0, colorMax);
     r = colorMax;
     b = 0;
-  }
-  else if (hue <= hueMax * 2 / 6) {
+  } else if (hue <= hueMax * 2 / 6) {
     g = colorMax;
     r = map(hue, hueMax * 1 / 6, hueMax * 2 / 6, colorMax, 0);
     b = 0;
-  }
-  else if (hue <= hueMax * 3 / 6) {
+  } else if (hue <= hueMax * 3 / 6) {
     g = colorMax;
     r = 0;
     b = map(hue, hueMax * 2 / 6, hueMax * 3 / 6, 0, colorMax);
-  }
-  else if (hue <= hueMax * 4 / 6) {
+  } else if (hue <= hueMax * 4 / 6) {
     g = map(hue, hueMax * 3 / 6 + 1, hueMax * 4 / 6, colorMax, 0);
     r = 0;
     b = colorMax;
-  }
-  else if (hue <= hueMax * 5 / 6) {
+  } else if (hue <= hueMax * 5 / 6) {
     g = 0;
     r = map(hue, hueMax * 4 / 6 + 1, hueMax * 5 / 6, 0, colorMax);
     b = colorMax;
-  }
-  else {
+  } else {
     g = 0;
     r = colorMax;
     b = map(hue, hueMax * 5 / 6 + 1, hueMax, colorMax, 0);
